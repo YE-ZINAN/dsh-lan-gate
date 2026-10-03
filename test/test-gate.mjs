@@ -69,7 +69,7 @@ function check(name, cond, detail) {
     fs.mkdirSync(path.dirname(STATE_PATH), { recursive: true });
     fs.writeFileSync(STATE_PATH, JSON.stringify({
       version: 1, rateBuckets: {},
-      devices: { testdevice01: { id: 'testdevice01', ip: '192.168.10.99', label: '测试设备 · Chrome', userAgent: 'test', status: 'pending', firstSeen: Date.now() } },
+      devices: { testdevice01: { id: 'testdevice01', ip: '192.168.1.99', label: '测试设备 · Chrome', userAgent: 'test', status: 'pending', firstSeen: Date.now() } },
     }, null, 2), 'utf8');
     console.log('  ⚠️ 需要重启网关才能载入；本项标注为「待人工重启后验证」');
   }

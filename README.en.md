@@ -105,8 +105,8 @@ network guard blocked: none of the local IPs [10.0.2.15] is in the allowed segme
 When blocked, **the port is never opened at all** (it is not “listen first, then close” — that would leave a window that can be scanned) and the process exits immediately.
 
 - The default allowed segment is written at the top of `lan-gate.ps1` (default `192.168..`, covering the vast majority of home routers)
-- **If you want it stricter, hard-code it to your own segment** (for example `192.168.10.`), so that phone hotspots and other networks that are also `192.168.x` get blocked too
-- You can write several segments: `$env:LAN_GATE_ALLOW_NET = '192.168.10.,10.0.0.'`
+- **If you want it stricter, hard-code it to your own segment** (for example `192.168.1.`), so that phone hotspots and other networks that are also `192.168.x` get blocked too
+- You can write several segments: `$env:LAN_GATE_ALLOW_NET = '192.168.1.,10.0.0.'`
 - **Temporary allow (valid for this run only)**: `$env:LAN_GATE_ALLOW_NET='off'; .\lan-gate.ps1 start`
 
 ### How auto-start is configured
@@ -295,11 +295,7 @@ dsh-lan-gate/
     ├── probe-lan.mjs       probe via the LAN IP (leaves a pending device in the state)
     ├── probe-ipad-icon.mjs the icon tags and assets an iPad actually receives
     ├── recon-layout.mjs    measure the host layout (box-model chain)
-    ├── exp-cookie.mjs      feasibility experiment for self-signed Cookies (historical evidence)
-    ├── test-api.mjs        early route-guessing probe (conclusion: unreliable, superseded by test-routes)
-    ├── recon-css.mjs       early CSS reconnaissance (superseded)
-    ├── recon-css2.mjs      same as above
-    └── probe.mjs           the very first pathfinding version (historical)
+    └── exp-cookie.mjs      feasibility experiment for self-signed Cookies (historical evidence)
 ```
 
 ---
