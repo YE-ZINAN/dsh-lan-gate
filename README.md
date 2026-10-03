@@ -2,7 +2,11 @@
 
 > [English](README.en.md) | 中文
 
-让**手机 / iPad** 在同一个 WiFi 下安全地访问电脑上的 **DeepSeek Harness 桌面端**。
+**电脑上的 DeepSeek Harness，手机和 iPad 也能用。** 同一个 WiFi 下打开一个网址就能接着聊，不用装客户端，DSH 仍然只监听本机、不对外暴露。
+
+![手机和 iPad 上的 DSH](docs/example.png)
+
+*上排是加到主屏幕之后的图标，下排是手机上、iPad 上实际用起来的样子。*
 
 ```
 手机 / iPad ──▶ dsh-lan-gate（本机 Node，0.0.0.0:3089）──▶ DSH Web（127.0.0.1:19387，只认本机）
@@ -268,6 +272,7 @@ dsh-lan-gate/
 │   ├── mobile.mjs          手机与平板排版注入 + 诊断上报
 │   └── pwa.mjs             manifest、图标路由、Apple 全屏 meta
 ├── assets/                 App 图标（由 tools/make-icons.py 生成）
+├── docs/                   README 用的示例图（由 tools/make-example.py 拼）
 │   ├── icon-180.png        iOS apple-touch-icon
 │   ├── icon-192.png
 │   ├── icon-512.png
@@ -283,6 +288,7 @@ dsh-lan-gate/
 │   └── test-routes.mjs     真实 API 路径 + Origin 栅栏
 └── tools/                  开发与运维辅助（运行时不需要）
     ├── make-icons.py       从一张母图生成全套 App 图标
+    ├── make-example.py     把几张截图拼成 README 用的 2x2 示例图
     ├── check-templates.mjs 防再犯：检查模板字符串里的裸反引号
     ├── verify-inject.mjs   断言注入结构（断点位置、花括号配平）
     ├── verify-ua.mjs       各 UA 下的注入行为对照
