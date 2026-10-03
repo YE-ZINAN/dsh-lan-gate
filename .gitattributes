@@ -1,0 +1,31 @@
+# 换行与编码约定
+#
+# 为什么需要这个文件：Windows PowerShell 5.1 默认按 GBK 读取 .ps1。
+# 如果 lan-gate.ps1 丢了 UTF-8 BOM，脚本里的中文会变乱码、产生未闭合字符串，
+# 结果是**不报错、不输出、直接卡死**（排查起来极其误导）。
+# 所以 .ps1 必须保留 BOM —— git 不会改内容里的 BOM，这里只声明换行策略，
+# 把它固化成约定，避免以后换机器 checkout 时出意外。
+
+* text=auto
+
+# Windows 脚本用 CRLF
+*.cmd text eol=crlf
+*.ps1 text eol=crlf
+*.vbs text eol=crlf
+*.bat text eol=crlf
+
+# 其余文本统一 LF（跨平台一致）
+*.mjs text eol=lf
+*.js  text eol=lf
+*.py  text eol=lf
+*.md  text eol=lf
+*.json text eol=lf
+*.yml text eol=lf
+
+# 二进制
+*.png binary
+*.jpg binary
+*.gif binary
+*.webp binary
+*.mp3 binary
+*.wav binary
