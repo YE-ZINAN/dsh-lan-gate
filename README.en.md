@@ -8,6 +8,8 @@
 
 *Top row, the icon after adding it to the home screen. Bottom row, what it looks like in use on a phone and on an iPad.*
 
+> ⚠️ **Use this only on a LAN you trust.** It listens on `0.0.0.0` over plain HTTP with no TLS, and you can stop it any time with `.\lan-gate.ps1 stop`. The full security boundary, including what it does not protect against, is [further down](#security-boundary).
+
 ```
 phone / iPad ──▶ dsh-lan-gate (local Node, 0.0.0.0:3089) ──▶ DSH Web (127.0.0.1:19387, loopback only)
                     ↑
