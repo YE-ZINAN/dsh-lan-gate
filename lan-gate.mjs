@@ -248,6 +248,20 @@ async function handleAdmin(req, res, ip) {
     });
   }
 
+  // 结构化状态：给 DSH 里的「手机接入」按钮用（宿主半区转发，避免跨域）。
+  // 只给计数 + 待批准设备的标签，和本页显示的信息同源，不多暴露。
+  if (req.method === 'GET' && url.pathname === ADMIN_PATH + '/summary') {
+    const { pending, approved, denied } = listDevices();
+    return sendJson(res, 200, {
+      ok: true,
+      pending: pending.length,
+      approved: approved.length,
+      denied: denied.length,
+      pendingDevices: pending.map((d) => ({ id: d.id, ip: d.ip, label: d.label, firstSeen: d.firstSeen })),
+      listenPort: LISTEN_PORT,
+    });
+  }
+
   if (req.method === 'POST' && url.pathname === '/__langate/admin/action') {
     let payload = {};
     try { payload = JSON.parse(await collect(req)); } catch { /* 空体也接受 */ }

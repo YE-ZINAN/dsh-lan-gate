@@ -1,6 +1,9 @@
 # 运行日志（含访问 IP、设备名，不该进仓库）
 run.log
 run.err.log
+# 轮转保留下来的上一次日志（同样含 IP 与设备名）
+run.log.prev
+run.err.log.prev
 *.tmp
 
 # 本地状态与密钥 —— 真实位置在 ~/.dsh/ 下，这里只是兜底
@@ -26,3 +29,6 @@ Desktop.ini
 # 生成文档时留下的临时脚本（踩过：被误提交进初始提交）
 .tmp-*
 *.tmp-*
+
+# 计划任务定义的备份（含本机计算机名、用户 SID 与本地绝对路径）
+tools/autostart-task-backup*.xml

@@ -1,0 +1,32 @@
+{
+  "name": "dsh-lan-gate-button",
+  "version": "1.0.0",
+  "private": true,
+  "description": "DSH 桌面端左栏底部的「手机接入」按钮：显示待批准设备数，点一下用系统浏览器打开 dsh-lan-gate 的批准页。网关没在跑时自动拉起。",
+  "type": "module",
+  "exports": {
+    ".": "./index.js",
+    "./client": "./client.js",
+    "./package.json": "./package.json"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web",
+      "immediately": true,
+      "inject": [
+        "@deepseek-ai/dsh-client-ui-conversation",
+        "@deepseek-ai/dsh-api-remotes"
+      ]
+    }
+  },
+  "files": [
+    "index.js",
+    "client.js",
+    "cordis.patch.yml",
+    "README.md"
+  ],
+  "license": "MIT"
+}

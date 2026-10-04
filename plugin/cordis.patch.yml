@@ -1,0 +1,14 @@
+# dsh-lan-gate-button —— DSH bundle patch
+#
+# 只插一行：挂载本包。patch 是「按 id 定位 + 整行替换 config」的，
+# 所以这里不要顺带覆盖别的行。
+- insert:
+    - id: dsh-lan-gate-button
+      name: dsh-lan-gate-button
+      config:
+        # 网关端口。改了 LAN_GATE_PORT 就同时改这里。
+        gatewayPort: 3089
+        # 自启用的计划任务名（由 tools\install-autostart.ps1 注册）。
+        # 之所以走计划任务而不是直接 node：DSH 里起的进程会随命令树一起被杀，
+        # 计划任务起的不会。
+        taskName: dsh-lan-gate

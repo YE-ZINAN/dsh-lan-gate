@@ -85,7 +85,13 @@ function Start-Gate {
     if (Get-GateProcess) { Write-Host '已在运行，无需重复启动（要重启用 restart）'; return }
     if (-not (Test-Path $Entry)) { Write-Host "找不到入口文件: $Entry"; exit 1 }
 
-    Remove-Item $LogOut, $LogErr -ErrorAction SilentlyContinue
+    # 轮转，不删除。上一次的 run.log 是「它为什么停了」的唯一线索，
+    # 直接 Remove 会让死因随日志一起消失（2026-10-04 真的踩到过）。
+    foreach ($pair in @(@($LogOut, "$LogOut.prev"), @($LogErr, "$LogErr.prev"))) {
+        if (Test-Path -LiteralPath $pair[0]) {
+            Move-Item -LiteralPath $pair[0] -Destination $pair[1] -Force -ErrorAction SilentlyContinue
+        }
+    }
     $proc = Start-Process -FilePath 'node' -ArgumentList 'lan-gate.mjs' -WorkingDirectory $Root `
         -RedirectStandardOutput $LogOut -RedirectStandardError $LogErr -WindowStyle Hidden -PassThru
 

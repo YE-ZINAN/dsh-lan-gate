@@ -52,6 +52,16 @@ function check(name, cond, detail) {
   check('管理页可达（回环）', admin.status === 200 && /DSH 局域网网关/.test(admin.body));
   check('管理页含「待批准」区块', /待批准/.test(admin.body));
 
+  // DSH 里那个「手机接入」按钮靠这条接口拿状态（宿主半区转发，客户端同源 fetch）
+  const summary = await G('/__langate/admin/summary');
+  let summaryJson = null;
+  try { summaryJson = JSON.parse(summary.body); } catch { /* 保持 null，下面会判失败 */ }
+  check('状态接口返回 JSON', summary.status === 200 && /json/.test(summary.headers['content-type'] || ''), 'status=' + summary.status);
+  check('状态接口含 pending/approved 计数',
+    !!summaryJson && typeof summaryJson.pending === 'number' && typeof summaryJson.approved === 'number',
+    'body=' + String(summary.body).slice(0, 120));
+  check('状态接口列出待批准设备明细', !!summaryJson && Array.isArray(summaryJson.pendingDevices));
+
   console.log('\n=== B. 代理功能仍然正常（回归）===');
   const home = await G('/', { headers: { host: '127.0.0.1:3089' } });
   check('首页 200', home.status === 200, 'got ' + home.status);
