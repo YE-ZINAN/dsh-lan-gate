@@ -1,9 +1,21 @@
 {
   "name": "dsh-lan-gate-button",
   "version": "1.0.0",
-  "private": true,
   "description": "DSH 桌面端左栏底部的「手机接入」按钮：显示待批准设备数，点一下用系统浏览器打开 dsh-lan-gate 的批准页。网关没在跑时自动拉起。",
   "type": "module",
+  "keywords": [
+    "dsh",
+    "dsh-plugin",
+    "deepseek-harness",
+    "deepseek-harness-plugin",
+    "lan-gateway",
+    "remote-access"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/YE-ZINAN/dsh-lan-gate.git",
+    "directory": "plugin"
+  },
   "exports": {
     ".": "./index.js",
     "./client": "./client.js",
