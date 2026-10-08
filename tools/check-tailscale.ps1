@@ -110,15 +110,23 @@ if (Test-Path $log) {
 Head '5. 端口在 Tailscale 网卡上是否可达'
 
 if ($tsIp) {
+    # 判据：能拿到「任何」HTTP 响应就说明端口在该网卡上可达。
+    # 403 是正常且正确的 —— 说明管理台的「仅本机」栅栏在起作用
+    # （网关若启动早于 Tailscale 连接，SELF_IPS 里就没有本机的 100.x 地址）。
     try {
-        $r = Invoke-WebRequest "http://${tsIp}:3089/__langate/admin" -UseBasicParsing -TimeoutSec 8
-        Mark $true "从本机经 $tsIp 访问网关：HTTP $($r.StatusCode)"
-        Warn '注意：本机访问会被判成「自己人」，所以这里 200 是正常的，不代表门禁通过'
+        $r = Invoke-WebRequest "http://${tsIp}:3089/" -UseBasicParsing -TimeoutSec 8
+        Mark $true "经 $tsIp 访问网关首页：HTTP $($r.StatusCode)"
     } catch {
-        Mark $false "经 $tsIp 访问失败：$($_.Exception.Message)"
-        Warn '多半是 Windows 防火墙拦了入站。若三个 profile 全关则不是这个原因。'
-        $problems++
+        $resp = $_.Exception.Response
+        if ($resp) {
+            Mark $true "经 $tsIp 访问网关：HTTP $([int]$resp.StatusCode)（能拿到响应即说明端口可达）"
+        } else {
+            Mark $false "经 $tsIp 完全连不上：$($_.Exception.Message)"
+            Warn '这才是真故障：端口没监听，或 Windows 防火墙拦了入站。'
+            $problems++
+        }
     }
+    Warn '本项只证明「端口在该网卡上可达」，门禁的真正验证要在手机上做'
 } else {
     Warn '跳过（没有 Tailscale IP）'
 }
