@@ -3,7 +3,9 @@
  *
  * 在左栏底部（设置图标旁）加一个「手机接入」按钮：
  *
- *   · 显示网关状态和待批准设备数 —— 有人举着手在等，按钮上直接看得见
+ *   · 显示当前接入范围：「局域网＋远程」还是「仅局域网」
+ *     实心绿点＝远程可用；空心绿点＝只有局域网（侧栏收成 56px 轨道时也能一眼分辨）
+ *     待批准数并入标签，不会把接入范围盖掉
  *   · 点一下用系统浏览器打开网关批准页（桌面端 window.open 会经
  *     setWindowOpenHandler → shell.openExternal 走默认浏览器）
  *   · 网关没在跑就显示成「启动手机网关」，点击先走计划任务把它拉起来、
@@ -66,7 +68,10 @@ window.__ModuleLoader__.load({
 
     const DOT = {
       base: { width: '7px', height: '7px', borderRadius: '50%', flex: '0 0 auto' },
+      /** 网关在跑且远程可用（实心绿）。 */
       up: { background: '#2ea043' },
+      /** 网关在跑但只有局域网（空心绿）—— 侧栏收成 56px 轨道时也能一眼分辨。 */
+      upLanOnly: { background: 'transparent', boxShadow: 'inset 0 0 0 2px #2ea043' },
       pending: { background: '#d29922' },
       down: { background: '#8b949e' },
       busy: { background: '#d29922' },
@@ -118,6 +123,16 @@ window.__ModuleLoader__.load({
       const adminUrl = data.adminUrl || FALLBACK_ADMIN
       const busy = state.phase === 'starting'
 
+      const port = Number(data.listenPort || 3089)
+      const lanIp = String(data.lanIp || '')
+      const tailscaleIp = String(data.tailscaleIp || '')
+      const approved = Number(data.approved || 0)
+      /**
+       * 远程是否可用 = 本机有没有 Tailscale 的 100.x 地址。
+       * 网关绑的是 0.0.0.0，所以只要本机有这张网卡、网关又在跑，外面就通。
+       */
+      const remoteReady = tailscaleIp !== ''
+
       let label
       let dot
       let title
@@ -129,14 +144,17 @@ window.__ModuleLoader__.load({
         label = '启动手机网关'
         dot = DOT.down
         title = '网关当前没在运行。点一下拉起并打开批准页'
-      } else if (pending > 0) {
-        label = '待批准 ' + pending
-        dot = DOT.pending
-        title = pending + ' 台设备正在等待批准。点一下打开批准页'
       } else {
-        label = '手机接入'
-        dot = DOT.up
-        title = '网关运行中，已批准 ' + Number(data.approved || 0) + ' 台。点一下打开批准页'
+        const mode = remoteReady ? '局域网＋远程' : '仅局域网'
+        label = pending > 0 ? mode + ' · 待批 ' + pending : mode
+        dot = pending > 0 ? DOT.pending : (remoteReady ? DOT.up : DOT.upLanOnly)
+        const where = []
+        if (lanIp) where.push('局域网 ' + lanIp + ':' + port)
+        if (remoteReady) where.push('远程 ' + tailscaleIp + ':' + port)
+        else where.push('没检测到 Tailscale 地址(100.x) —— 人在外面连不上')
+        title = '网关运行中 · ' + mode + '\n' + where.join('\n') +
+          '\n已批准 ' + approved + ' 台' + (pending > 0 ? '，待批准 ' + pending + ' 台' : '') +
+          '\n点一下打开批准页'
       }
 
       const onClick = async () => {

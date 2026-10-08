@@ -16,6 +16,7 @@
  */
 
 import { spawn } from 'node:child_process';
+import os from 'node:os';
 
 export const name = 'dsh-lan-gate-button';
 
@@ -30,6 +31,29 @@ const DEFAULTS = {
   /** 单次探测网关的超时。 */
   probeTimeoutMs: 1500,
 };
+
+const RFC1918 = /^(192\.168\.|10\.|172\.(1[6-9]|2\d|3[01])\.)/;
+
+/**
+ * 本机可用地址分类。给客户端用来判断「现在只有局域网，还是局域网＋远程」。
+ *
+ * 为什么在宿主半区算而不是问网关：网关绑的是 0.0.0.0，它自己也不枚举网卡；
+ * 而「远程是否可用」本质上就是「本机有没有 Tailscale 的 100.x 地址」。
+ * 宿主进程在 Node 里，直接读网卡最准，也不必给网关加接口。
+ */
+function localAddresses() {
+  const out = { lanIp: '', tailscaleIp: '', addresses: [] };
+  for (const list of Object.values(os.networkInterfaces())) {
+    for (const ni of list || []) {
+      if (!ni || ni.family !== 'IPv4' || ni.internal) continue;
+      out.addresses.push(ni.address);
+      // 先判 Tailscale（100.64.0.0/10，CGNAT），再判私网
+      if (!out.tailscaleIp && ni.address.startsWith('100.')) { out.tailscaleIp = ni.address; continue; }
+      if (!out.lanIp && RFC1918.test(ni.address)) out.lanIp = ni.address;
+    }
+  }
+  return out;
+}
 
 function sendJson(res, status, value) {
   const body = Buffer.from(JSON.stringify(value), 'utf8');
@@ -49,19 +73,21 @@ export function apply(ctx, rawConfig) {
 
   /** 探测网关。永远 resolve，绝不抛 —— 客户端要的是状态，不是异常。 */
   const probe = async () => {
+    const net = localAddresses();
     try {
       const response = await fetch(summaryUrl, { signal: AbortSignal.timeout(config.probeTimeoutMs) });
       if (!response.ok) {
         // 端口有人应答但不是我们的接口（多半是端口被别的程序占了）
-        return { ok: false, running: true, httpStatus: response.status, adminUrl };
+        return { ok: false, running: true, httpStatus: response.status, adminUrl, ...net };
       }
       const data = await response.json();
-      return { ok: true, running: true, ...data, adminUrl };
+      return { ok: true, running: true, ...data, adminUrl, ...net };
     } catch (error) {
       return {
         ok: false,
         running: false,
         adminUrl,
+        ...net,
         reason: String((error && error.message) || error),
       };
     }
