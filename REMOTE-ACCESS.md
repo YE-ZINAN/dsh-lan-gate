@@ -60,6 +60,14 @@ git push origin main          → 放行
 
 ## 4. Tailscale 端到端步骤
 
+> **装完先跑自检**，它会一次性检查客户端、网卡、tailnet 设备、网关进程、守卫判定、端口可达性、是否插电，并直接给出手机要打开的地址：
+>
+> ```powershell
+> powershell -NoProfile -ExecutionPolicy Bypass -File tools\check-tailscale.ps1
+> ```
+>
+> 退出码 = 未通过项数，`0` 表示主机侧全部就绪。它查不到的只有两项（电源计划、Windows 更新自动重启），会打印出来提醒你自己确认。
+
 ### 4.1 装与登录
 
 | 端 | 操作 |
